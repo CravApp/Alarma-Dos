@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   provider: 6.1.5+1
   shared_preferences: 2.5.3
-  google_fonts: 6.2.1
+  google_fonts: ^6.3.0 # Update to 6.3.0 or the latest version
   flutter_animate: 4.5.0
   smooth_page_indicator: 1.2.0+3
   cupertino_icons: ^1.0.8
