@@ -11,8 +11,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -38,7 +38,12 @@ android {
         }
     }
 }
+dependencies {
+    // ... other dependencies ...
 
+    // Add this line (version 2.0.4 is currently stable)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+}
 flutter {
     source = "../.."
 }
