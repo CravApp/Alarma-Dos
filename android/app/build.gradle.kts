@@ -12,8 +12,8 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true // Kotlin DSL syntax uses 'is' and '='
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
