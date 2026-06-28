@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'providers/app_provider.dart';
+import 'services/background_service.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
@@ -17,6 +18,9 @@ void main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
+  // Iniciar foreground service (Android: silente, Web: stub)
+  await AlarmadosBackgroundService().start();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AppProvider(),

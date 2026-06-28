@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/app_provider.dart';
 import 'alert_screen.dart';
+import 'ble_pairing_screen.dart';
 import 'plans_screen.dart';
 import 'contacts_screen.dart';
 import 'profile_screen.dart';
@@ -315,56 +316,8 @@ class _HomeTab extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // ── Card dispositivo Alarma Dos ──
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryPurple,   // #782D69
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset('assets/icons/app_icon.png', width: 52, height: 52, fit: BoxFit.cover),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Alarma Dos', style: GoogleFonts.lato(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 15)),
-                            Text(
-                              provider.bluetoothConnected ? 'Conectado ✓' : 'Sin conexión',
-                              style: GoogleFonts.lato(color: AppColors.pinkField, fontSize: 12),  // #F0B4D2
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.read<AppProvider>().toggleBluetooth(),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: provider.bluetoothConnected
-                                ? AppColors.pinkHot          // #E178A5
-                                : AppColors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            provider.bluetoothConnected ? 'ON' : 'OFF',
-                            style: GoogleFonts.lato(
-                              color: AppColors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate(delay: 900.ms).fadeIn().slideY(begin: 0.2, end: 0),
+                // ── Card dispositivo Alarma Dos — con batería + estado armado ──
+                _DeviceCard(provider: provider).animate(delay: 900.ms).fadeIn().slideY(begin: 0.2, end: 0),
 
                 const SizedBox(height: 100),
               ],
@@ -444,7 +397,7 @@ class _HomeTab extends StatelessWidget {
             height: 44,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryPurple,  // #782D69
+              color: AppColors.primaryPurple,
             ),
             child: Center(
               child: Text(name[0], style: GoogleFonts.lato(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 18)),
@@ -468,6 +421,323 @@ class _HomeTab extends StatelessWidget {
             ),
             child: Text('Activo', style: GoogleFonts.lato(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Device Card — Diseño F actualizado
+// Muestra: silueta charm | batería | estado Conectado | "Sistema Armado"
+// ─────────────────────────────────────────────────────────────────────────────
+class _DeviceCard extends StatelessWidget {
+  final AppProvider provider;
+  const _DeviceCard({required this.provider});
+
+  Color _batteryColor(int pct) {
+    if (pct > 50) return AppColors.success;
+    if (pct > 20) return AppColors.gold;
+    return AppColors.danger;
+  }
+
+  IconData _batteryIcon(int pct) {
+    if (pct > 90) return Icons.battery_full;
+    if (pct > 70) return Icons.battery_5_bar;
+    if (pct > 50) return Icons.battery_4_bar;
+    if (pct > 30) return Icons.battery_3_bar;
+    if (pct > 15) return Icons.battery_2_bar;
+    return Icons.battery_1_bar;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final connected = provider.bluetoothConnected;
+    final battery   = provider.deviceBattery;
+    final armed     = provider.isArmed;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primaryPurple,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryPurple.withValues(alpha: 0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // ── Fila principal ────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                // Charm image en contenedor crema
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5EDD8), // crema
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.gold.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset('assets/icons/app_icon.png', fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Alarma Dos',
+                            style: GoogleFonts.lato(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Badge ESP32
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.gold.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.gold.withValues(alpha: 0.5)),
+                            ),
+                            child: Text(
+                              'ESP32-C3',
+                              style: GoogleFonts.lato(
+                                color: AppColors.gold,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Estado conexión
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: connected ? AppColors.success : AppColors.textGrey,
+                              boxShadow: connected
+                                  ? [BoxShadow(color: AppColors.success.withValues(alpha: 0.6), blurRadius: 6)]
+                                  : [],
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            connected ? 'Conectado' : 'Sin conexión',
+                            style: GoogleFonts.lato(
+                              color: connected ? AppColors.pinkField : AppColors.textGrey,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Batería (solo si conectado)
+                      if (connected && battery > 0) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              _batteryIcon(battery),
+                              color: _batteryColor(battery),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$battery%',
+                              style: GoogleFonts.lato(
+                                color: _batteryColor(battery),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: battery / 100,
+                                  backgroundColor: AppColors.white.withValues(alpha: 0.15),
+                                  valueColor: AlwaysStoppedAnimation(_batteryColor(battery)),
+                                  minHeight: 5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Botón conectar / desvincular
+                GestureDetector(
+                  onTap: () {
+                    if (connected) {
+                      context.read<AppProvider>().toggleBluetooth();
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const BlePairingScreen()),
+                      );
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: connected
+                          ? AppColors.pinkHot
+                          : AppColors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          connected ? Icons.bluetooth_connected : Icons.bluetooth_searching,
+                          color: AppColors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          connected ? 'ON' : 'Vincular',
+                          style: GoogleFonts.lato(
+                            color: AppColors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Divider ───────────────────────────────────────────────────────
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 18),
+            color: AppColors.white.withValues(alpha: 0.12),
+          ),
+
+          // ── Indicador "Sistema Armado y Vigilando" ─────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            child: Row(
+              children: [
+                // Ícono check animado
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: armed
+                        ? AppColors.success.withValues(alpha: 0.2)
+                        : AppColors.white.withValues(alpha: 0.08),
+                    border: Border.all(
+                      color: armed
+                          ? AppColors.success.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    armed ? Icons.check_circle : Icons.radio_button_unchecked,
+                    color: armed ? AppColors.success : AppColors.white.withValues(alpha: 0.35),
+                    size: 22,
+                  ),
+                )
+                    .animate(
+                      target: armed ? 1 : 0,
+                      onPlay: (c) => armed ? c.repeat(reverse: true) : null,
+                    )
+                    .scaleXY(
+                      begin: 1.0,
+                      end: 1.12,
+                      duration: 900.ms,
+                      curve: Curves.easeInOut,
+                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        armed ? 'Sistema Armado y Vigilando' : 'Sistema en espera',
+                        style: GoogleFonts.lato(
+                          color: armed ? AppColors.success : AppColors.white.withValues(alpha: 0.5),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        armed
+                            ? 'Suscrito a notificaciones BLE · Handshake activo'
+                            : 'Vincula el dispositivo para activar el monitoreo',
+                        style: GoogleFonts.lato(
+                          color: AppColors.pinkField.withValues(alpha: 0.7),
+                          fontSize: 11,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Indicador de señal BLE activa
+                if (armed)
+                  _PulsingDot()
+                      .animate(onPlay: (c) => c.repeat())
+                      .fadeIn(duration: 600.ms)
+                      .then()
+                      .fadeOut(duration: 600.ms),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Punto pulsante verde (BLE activo) ────────────────────────────────────────
+class _PulsingDot extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.success,
+        boxShadow: [
+          BoxShadow(color: AppColors.success.withValues(alpha: 0.7), blurRadius: 8, spreadRadius: 2),
         ],
       ),
     );

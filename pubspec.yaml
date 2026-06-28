@@ -11,10 +11,15 @@ dependencies:
     sdk: flutter
   provider: 6.1.5+1
   shared_preferences: 2.5.3
-  google_fonts: ^6.3.0 # Update to 6.3.0 or the latest version
+  google_fonts: 6.2.1
   flutter_animate: 4.5.0
   smooth_page_indicator: 1.2.0+3
   cupertino_icons: ^1.0.8
+  # BLE — real hardware on Android, simulated on Web
+  flutter_blue_plus: 1.35.3
+  # Background service (Foreground Service Android / BGTask iOS)
+  flutter_background_service: 5.1.0
+  flutter_local_notifications: 17.2.4
 
 dev_dependencies:
   flutter_test:
